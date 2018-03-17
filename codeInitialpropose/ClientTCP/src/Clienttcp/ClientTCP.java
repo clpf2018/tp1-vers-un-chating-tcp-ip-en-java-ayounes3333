@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,7 +24,7 @@ public class ClientTCP {
      * @return le BufferedReader crée
      * @throws IOException 
      */
-    private static BufferedReader getInput(Socket p) throws IOException {
+    public static BufferedReader getInput(Socket p) throws IOException {
         return new BufferedReader(new InputStreamReader(p.getInputStream()));
     }
   
@@ -35,7 +37,7 @@ public class ClientTCP {
      * @return le PrintWriter crée
      * @throws IOException 
      */
-    private static PrintWriter getoutput(Socket p) throws IOException{
+    public static PrintWriter getoutput(Socket p) throws IOException{
         return new PrintWriter (new OutputStreamWriter(p.getOutputStream()));
     }
     /**
@@ -47,12 +49,16 @@ public class ClientTCP {
         Socket l = new Socket("localhost",2000);
         System.out.println(l.getLocalSocketAddress());
         //
-        BufferedReader entreeSock = getInput(l);
-        PrintWriter sortieSock = getoutput(l);
-        //Envoyer une chaine
-        sortieSock.printf("Bonjour\n");sortieSock.flush();
-        //Récupérer la réponse puis l'afficher
-        System.out.println(entreeSock.readLine());
+        ThreadEmeteur emeteur = new ThreadEmeteur(l);
+        ThreadRecepteur recepteur = new ThreadRecepteur(l);
+        emeteur.start();
+        recepteur.start();
+        try {
+            emeteur.join();
+            recepteur.join();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ClientTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }
