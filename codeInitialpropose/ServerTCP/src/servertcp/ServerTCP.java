@@ -22,7 +22,7 @@ public class ServerTCP {
      * @return le BufferedReader crée
      * @throws IOException 
      */
-    private static BufferedReader getInput(Socket p) throws IOException {
+    public static BufferedReader getInput(Socket p) throws IOException {
         return new BufferedReader(new InputStreamReader(p.getInputStream()));
     }
 /**
@@ -34,7 +34,7 @@ public class ServerTCP {
      * @return le PrintWriter crée
      * @throws IOException 
      */
-    private static PrintWriter getoutput(Socket p) throws IOException {
+    public static PrintWriter getoutput(Socket p) throws IOException {
         return new PrintWriter(new OutputStreamWriter(p.getOutputStream()));
     }
 
@@ -47,20 +47,11 @@ public class ServerTCP {
         System.out.println(l.getLocalSocketAddress());
         while (true) {
             //try-with-resource
-            try (Socket serviceSocket = l.accept()) {
                 //Acceper un client l.accept()
-                System.out.println(serviceSocket.getRemoteSocketAddress());
-                BufferedReader ir = getInput(serviceSocket);
-                PrintWriter reply = getoutput(serviceSocket);
-                String line;                
-                while ((line = ir.readLine()) != null) {                  
-                    System.out.printf("je répond ping %s\n", line);
-                    reply.printf("je répond ping %s\n", line);
-                    reply.flush();
-                }
-                //clore la socket (réalisé par try-with resource
-            }
+                Socket serviceSocket = l.accept();
+                System.out.println("Creation du thread pour le client: "+serviceSocket.getRemoteSocketAddress());
+                ThreadClient client = new ThreadClient(serviceSocket);
+                client.start();
         }
     }
-
 }
